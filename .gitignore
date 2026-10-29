@@ -7,3 +7,7 @@ dist/
 
 # настройки Claude Code
 .claude/
+
+# Cloudflare
+.wrangler/
+.dryrun/

@@ -2,7 +2,10 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bot, Send, Sparkles, X } from 'lucide-react'
 
-// Чат с тем же ИИ, что и в Telegram-боте (через bot/web.py)
+// Чат с тем же ИИ, что и в Telegram-боте.
+// Локально — через bot/web.py, в онлайн-версии — через Cloudflare Worker (VITE_CHAT_URL в .env.production)
+const CHAT_URL = import.meta.env.VITE_CHAT_URL || '/api/chat'
+
 export default function ChatWidget() {
   const [open, setOpen] = useState(false)
   const [input, setInput] = useState('')
@@ -24,17 +27,18 @@ export default function ChatWidget() {
     setMessages((m) => [...m, { role: 'user', text }])
     setLoading(true)
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch(CHAT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+        // облачному серверу нужна история, он сам ничего не запоминает
+        body: JSON.stringify({ message: text, history: messages }),
       })
       const data = await res.json()
       setMessages((m) => [...m, { role: 'assistant', text: data.answer }])
     } catch {
       setMessages((m) => [...m, {
         role: 'assistant',
-        text: '📡 В онлайн-версии ИИ-чат отключён. Поговорить со мной можно в Telegram: @scroll00Bot',
+        text: '📡 Нет связи с ИИ, попробуй ещё раз. Ещё я есть в Telegram: @scroll00Bot',
       }])
     } finally {
       setLoading(false)

@@ -4,6 +4,7 @@
 """
 import os
 from collections import defaultdict
+from pathlib import Path
 
 import anthropic
 from dotenv import load_dotenv
@@ -19,11 +20,16 @@ TIMEOUT_SECONDS = 40  # чтобы бот не завис на сцене, ес�
 CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-haiku-5-5")
 MAX_HISTORY = 20  # сколько последних сообщений помнить на одного пользователя
 
-# Поменяй под кейс хакатона, когда его объявят
-SYSTEM_PROMPT = """Ты — ИИ-ассистент стартапа на хакатоне в Казахстане.
-Отвечай кратко, дружелюбно и по делу, на языке пользователя (русский, казахский или английский).
-Суммы указывай в тенге (₸). Если не знаешь точных данных — честно скажи об этом.
-Пиши обычным текстом без Markdown: никаких звёздочек и решёток. Для списков используй «•» или эмодзи."""
+# Роль ИИ — в prompt.txt (его же читает облачный чат worker/). Поменяй под кейс хакатона.
+HERE = Path(__file__).resolve().parent
+SYSTEM_PROMPT = (HERE / "prompt.txt").read_text(encoding="utf-8").strip()
+
+# те же данные, что показывает дашборд
+DATA_FILE = HERE.parent / "dashboard" / "src" / "data.json"
+try:
+    SYSTEM_PROMPT += "\n\nДАННЫЕ:\n" + DATA_FILE.read_text(encoding="utf-8")
+except OSError:
+    pass  # нет файла — бот просто работает без данных
 
 # история: user_id -> [{"role": "user" | "assistant", "text": "..."}]
 _history: dict[int, list[dict]] = defaultdict(list)
@@ -116,7 +122,8 @@ async def ask(user_id: int, text: str) -> str:
             answer = await _ask_gemini(history)
     except AIError as e:
         history.pop()
-        return f"⚠️ {e}"
+        msg = str(e)
+        return msg if msg.startswith("⏳") else f"⚠️ {msg}"
     except Exception:
         # защита от падения на сцене: сеть, неожиданный ответ и т.п.
         history.pop()

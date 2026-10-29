@@ -1,0 +1,12 @@
+name = "scroll-ai-chat"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+GEMINI_MODEL = "gemini-3.1-flash-lite"
+
+# .txt подключаем как текст (промпт из bot/prompt.txt)
+[[rules]]
+type = "Text"
+globs = ["**/*.txt"]
+fallthrough = true
