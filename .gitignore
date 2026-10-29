@@ -1,0 +1,9 @@
+# ключи никогда не пушим!
+.env
+.venv/
+__pycache__/
+node_modules/
+dist/
+
+# настройки Claude Code
+.claude/
