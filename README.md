@@ -28,7 +28,10 @@ bot/         ИИ (Gemini или Claude): Telegram-бот (bot.py) и серве
 ## 2. Запуск
 
 - **Сайт с ИИ-чатом:** двойной клик по `start-site.bat` → откроется http://localhost:5173 (кнопка ✨ справа внизу — чат)
-- **Telegram-бот:** двойной клик по `start-bot.bat`
+- **Telegram-бот:** двойной клик по `start-bot.bat` (запускается в фоне, без окна, лог в `bot/bot.log`)
+  - `bot-autostart-on.bat` — бот сам стартует при включении ПК
+  - `bot-autostart-off.bat` — убрать из автозапуска
+  - `bot-stop.bat` — остановить бота
 - **Проверить ИИ без Telegram:** `cd bot` → `.venv\Scripts\python bot.py --cli`
 
 ## 3. Что менять под кейс

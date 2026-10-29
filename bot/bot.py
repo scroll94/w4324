@@ -6,7 +6,9 @@
 import asyncio
 import logging
 import os
+import socket
 import sys
+from pathlib import Path
 
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums import ChatAction
@@ -17,7 +19,14 @@ from dotenv import load_dotenv
 import ai
 
 load_dotenv()
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+LOG_FILE = Path(__file__).resolve().parent / "bot.log"
+# при фоновом запуске (pythonw, без окна) пишем лог в bot.log
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    **({"filename": LOG_FILE, "encoding": "utf-8"} if sys.stdout is None else {}),
+)
+LOCK_PORT = 47291  # занятый порт = бот уже запущен
 
 dp = Dispatcher()
 
@@ -60,12 +69,32 @@ async def main() -> None:
     if not token:
         sys.exit("TELEGRAM_BOT_TOKEN пустой — вставь токен от @BotFather в файл bot/.env")
     bot = Bot(token)
-    me = await bot.get_me()
+    # при включении ПК интернет появляется не сразу — ждём его
+    while True:
+        try:
+            me = await bot.get_me()
+            break
+        except Exception as e:
+            logging.warning("Нет связи с Telegram (%s), пробую снова через 10 с", type(e).__name__)
+            await asyncio.sleep(10)
     logging.info("Бот запущен: https://t.me/%s", me.username)
     await dp.start_polling(bot)
 
 
+def single_instance() -> socket.socket:
+    """Не даёт запустить второго бота: два бота с одним токеном мешают друг другу."""
+    lock = socket.socket()
+    try:
+        lock.bind(("127.0.0.1", LOCK_PORT))
+    except OSError:
+        logging.info("Бот уже запущен — второй экземпляр не нужен")
+        sys.exit(0)
+    return lock
+
+
 if __name__ == "__main__":
+    if "--cli" not in sys.argv:
+        _lock = single_instance()
     try:
         asyncio.run(run_cli() if "--cli" in sys.argv else main())
     except (KeyboardInterrupt, EOFError):

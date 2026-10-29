@@ -1,5 +1,3 @@
 @echo off
-chcp 65001 >nul
-cd /d "%~dp0bot"
-.venv\Scripts\python bot.py
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0bot\service.ps1" start
 pause
