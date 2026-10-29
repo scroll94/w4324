@@ -5,6 +5,10 @@ dashboard/   сайт-дашборд: React + Vite + Tailwind + Recharts + Frame
 bot/         ИИ (Gemini или Claude): Telegram-бот (bot.py) и сервер чата для сайта (web.py)
 ```
 
+**Онлайн-версия дашборда:** https://scroll94.github.io/w4324/site/ (ИИ-чат работает только в локальной версии и в Telegram-боте @scroll00Bot)
+
+Обновить онлайн-версию: `npm --prefix dashboard run build` → закоммитить папку `site/` → `git push`.
+
 ## 1. Вставь ключи
 
 Открой `bot/.env` и заполни:

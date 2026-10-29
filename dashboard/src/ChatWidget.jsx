@@ -32,7 +32,10 @@ export default function ChatWidget() {
       const data = await res.json()
       setMessages((m) => [...m, { role: 'assistant', text: data.answer }])
     } catch {
-      setMessages((m) => [...m, { role: 'assistant', text: '📡 ИИ-сервер не запущен. Запусти bot/web.py' }])
+      setMessages((m) => [...m, {
+        role: 'assistant',
+        text: '📡 В онлайн-версии ИИ-чат отключён. Поговорить со мной можно в Telegram: @scroll00Bot',
+      }])
     } finally {
       setLoading(false)
     }
